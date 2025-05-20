@@ -10,9 +10,36 @@
       background-color: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(8px);
     }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes fade-in-out {
+  0%, 100% { opacity: 0; transform: translateY(10px); }
+  20%, 80% { opacity: 1; transform: translateY(0); }
+}
+.fade-in-out {
+  animation: fade-in-out 3.5s ease-in-out;
+}
+
+@keyframes zoom {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.animate-zoom {
+  animation: zoom 4s ease-in-out infinite;
+}
+
+
   </style>
 </head>
-<body class="bg-gradient-to-b from-pink-100 to-purple-100 min-h-screen relative overflow-hidden">
+<body class="bg-gradient-to-b from-pink-100 to-purple-100 relative  min-h-screen">
+
 
   <!-- Background decorations -->
   <div class="absolute inset-0 overflow-hidden">
@@ -48,12 +75,10 @@
         <div id="dots" class="flex gap-2"></div>
       </div>
     </div>
-
-    <!-- Floating Quotes -->
-    <div class="relative w-full max-w-4xl h-80 md:h-96 mb-4">
-      <!-- Quotes will be inserted by JS -->
-    </div>
-
+<!-- Quote container -->
+<div id="quoteContainer" class="relative w-full max-w-4xl h-80 md:h-96 mb-4">
+    <!-- Quotes will appear here -->
+  </div>
     <!-- Footer -->
     <div class="mt-8 text-center">
       <p class="text-xl md:text-2xl text-purple-700 font-semibold">
@@ -130,22 +155,50 @@
     }, 5000);
 
     showImage(current); // Initial load
+    const quoteContainer = document.getElementById("quoteContainer");
+const isMobile = window.innerWidth < 768;
+let quoteIndex = 0;
 
-    // Quotes rendering
-    const quoteContainer = document.querySelector(".relative.w-full.max-w-4xl");
-    quotes.forEach((text, i) => {
-      const div = document.createElement("div");
-      div.className = `absolute quote-bg rounded-2xl p-4 shadow-lg ${
-        i % 3 === 0 ? "animate-bounce" : i % 3 === 1 ? "animate-pulse" : "animate-ping"
-      }`;
-      div.style.top = `${20 + (i * 10) % 60}%`;
-      div.style.left = `${10 + (i * 15) % 70}%`;
-      div.style.opacity = "0.9";
-      div.style.animationDelay = `${i * 0.5}s`;
-      div.style.animationDuration = `${3 + i}s`;
-      div.innerHTML = `<p class="text-sm md:text-base font-medium text-gray-800">${text}</p>`;
-      quoteContainer.appendChild(div);
-    });
+if (isMobile) {
+  // Mobile view: show one at a time with fade and floating
+  function showSingleQuote() {
+    quoteContainer.innerHTML = "";
+
+    const div = document.createElement("div");
+    div.className = `absolute rounded-2xl p-4 bg-white bg-opacity-80 shadow-lg text-center animate-float fade-in-out ${
+      quoteIndex === 3 ? "animate-zoom" : ""
+    }`;
+    div.style.top = "40%";
+    div.style.left = "10%";
+    div.style.right = "10%";
+
+    div.innerHTML = `<p class="text-base font-semibold text-gray-800">${quotes[quoteIndex]}</p>`;
+    quoteContainer.appendChild(div);
+
+    quoteIndex = (quoteIndex + 1) % quotes.length;
+  }
+
+  showSingleQuote();
+  setInterval(showSingleQuote, 4000);
+} else {
+  // Desktop: floating quotes all over
+  quotes.forEach((text, i) => {
+    const div = document.createElement("div");
+    const isZoom = i === 3; // 4th quote gets zoom animation
+
+    div.className = `absolute rounded-2xl p-4 bg-white bg-opacity-80 shadow-lg text-gray-800 font-medium text-sm md:text-base
+      ${isZoom ? "animate-zoom" : "animate-float"}`;
+    div.style.top = `${20 + (i * 10) % 60}%`;
+    div.style.left = `${10 + (i * 15) % 70}%`;
+    div.style.opacity = "0.9";
+    div.style.animationDelay = `${i * 0.5}s`;
+    div.style.animationDuration = `${4 + i % 3}s`;
+    div.innerHTML = `<p>${text}</p>`;
+
+    quoteContainer.appendChild(div);
+  });
+}
+
   </script>
 </body>
 </html>
